@@ -5,6 +5,9 @@
 
 // This is the main Web application configuration. Any writable
 // CWebApplication properties can be configured here.
+
+Yii::setPathOfAlias('bootstrap', dirname(__FILE__).'/../extensions/bootstrap');
+
 return array(
 	'basePath'=>dirname(__FILE__).DIRECTORY_SEPARATOR.'..',
 	'name'=>'My Web Application',
@@ -20,14 +23,18 @@ return array(
 
 	'modules'=>array(
 		// uncomment the following to enable the Gii tool
-		/*
 		'gii'=>array(
 			'class'=>'system.gii.GiiModule',
-			'password'=>'Enter Your Password Here',
+			'password'=>'doublepass',
 			// If removed, Gii defaults to localhost only. Edit carefully to taste.
-			'ipFilters'=>array('127.0.0.1','::1'),
+			'ipFilters'=>array('127.0.0.1','::1','192.168.137.1'),
+            'generatorPaths' => array(
+                'bootstrap.gii',
+            ),
 		),
-		*/
+        'auth' => array(
+            'defaultController' => 'Auth',
+        )
 	),
 
 	// application components
@@ -51,15 +58,15 @@ return array(
 			'connectionString' => 'sqlite:'.dirname(__FILE__).'/../data/testdrive.db',
 		),
 		// uncomment the following to use a MySQL database
-		/*
 		'db'=>array(
-			'connectionString' => 'mysql:host=localhost;dbname=testdrive',
-			'emulatePrepare' => true,
-			'username' => 'root',
-			'password' => '',
-			'charset' => 'utf8',
+            'connectionString' => 'mysql:host=localhost;dbname=shop',
+            'emulatePrepare' => true,
+            'username' => 'root',
+            'password' => 'doublepass',
+            'charset' => 'utf8',
+            'enableProfiling' => true,
+            'enableParamLogging' => true,
 		),
-		*/
 		'errorHandler'=>array(
 			// use 'site/error' action to display errors
 			'errorAction'=>'site/error',
@@ -79,9 +86,12 @@ return array(
 				*/
 			),
 		),
+        'bootstrap'=>array(
+            'class'=>'bootstrap.components.Bootstrap',
+        ),
 	),
-
-	// application-level parameters that can be accessed
+    'theme'=>'bootstrap',
+    // application-level parameters that can be accessed
 	// using Yii::app()->params['paramName']
 	'params'=>array(
 		// this is used in contact page
