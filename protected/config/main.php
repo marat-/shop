@@ -27,13 +27,19 @@ return array(
 			'class'=>'system.gii.GiiModule',
 			'password'=>'doublepass',
 			// If removed, Gii defaults to localhost only. Edit carefully to taste.
-			'ipFilters'=>array('127.0.0.1','::1','192.168.137.1'),
+			'ipFilters'=>array('127.0.0.1','::1','192.168.137.1','192.168.10.13'),
             'generatorPaths' => array(
                 'bootstrap.gii',
             ),
 		),
         'auth' => array(
             'defaultController' => 'Auth',
+        ),
+        'admin' => array(
+            'defaultController' => 'Admin',
+        ),
+        'news' => array(
+            'defaultController' => 'News',
         )
 	),
 
@@ -43,26 +49,24 @@ return array(
 			// enable cookie-based authentication
 			'allowAutoLogin'=>true,
 		),
-		// uncomment the following to enable URLs in path-format
-		/*
 		'urlManager'=>array(
 			'urlFormat'=>'path',
+            'showScriptName'=>false,
 			'rules'=>array(
 				'<controller:\w+>/<id:\d+>'=>'<controller>/view',
 				'<controller:\w+>/<action:\w+>/<id:\d+>'=>'<controller>/<action>',
 				'<controller:\w+>/<action:\w+>'=>'<controller>/<action>',
 			),
 		),
-		*/
 		'db'=>array(
 			'connectionString' => 'sqlite:'.dirname(__FILE__).'/../data/testdrive.db',
 		),
 		// uncomment the following to use a MySQL database
 		'db'=>array(
-            'connectionString' => 'mysql:host=localhost;dbname=shop',
+            'connectionString' => 'mysql:host=192.168.20.161;dbname=nefco_site',
             'emulatePrepare' => true,
             'username' => 'root',
-            'password' => 'doublepass',
+            'password' => 'vefllb,04',
             'charset' => 'utf8',
             'enableProfiling' => true,
             'enableParamLogging' => true,
@@ -75,8 +79,10 @@ return array(
 			'class'=>'CLogRouter',
 			'routes'=>array(
 				array(
-					'class'=>'CFileLogRoute',
-					'levels'=>'error, warning',
+                    'class'=>'CWebLogRoute',
+                    'levels'=>'error, warning, profile',
+                    'showInFireBug' => true,
+                    'categories'=>'system.db.CDbCommand.query, application'
 				),
 				// uncomment the following to show log messages on web pages
 				/*
@@ -88,6 +94,23 @@ return array(
 		),
         'bootstrap'=>array(
             'class'=>'bootstrap.components.Bootstrap',
+        ),
+        'clientScript' => array(
+            'packages' => array(
+
+                // описание пакета catalog
+                'common_js' => array(
+                    'baseUrl' => '/site/js',
+                    'js' => array('js/appos.catalog-1.0.0.js'),
+                ),
+                'common_css' => array(
+                    'baseUrl' => '/site/css',
+                    'css' => array('css/appos.catalog-3.0.0.css'),
+                ),
+                'common_resource' => array(
+                    'depends' => array('common_js','common_css'),
+                ),
+            ),
         ),
 	),
     'theme'=>'bootstrap',

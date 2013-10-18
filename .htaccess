@@ -1,0 +1,4 @@
+AddDefaultCharset utf-8
+RewriteEngine on
+RewriteCond $1 !^(assets|css|index\.php|robots\.txt)
+RewriteRule ^(.*)$ /new_nefco_site/index.php/$1 [L]
