@@ -11,7 +11,7 @@ Yii::setPathOfAlias('bootstrap', dirname(__FILE__).'/../extensions/bootstrap');
 return array(
 	'basePath'=>dirname(__FILE__).DIRECTORY_SEPARATOR.'..',
 	'name'=>'My Web Application',
-
+    'language'=>'ru',
 	// preloading 'log' component
 	'preload'=>array('log'),
 
@@ -80,7 +80,7 @@ return array(
 			'routes'=>array(
 				array(
                     'class'=>'CWebLogRoute',
-                    'levels'=>'error, warning, profile',
+                    'levels'=>'error, warning, profile, trace, info',
                     'showInFireBug' => true,
                     'categories'=>'system.db.CDbCommand.query, application'
 				),
@@ -97,20 +97,35 @@ return array(
         ),
         'clientScript' => array(
             'packages' => array(
-
-                // описание пакета catalog
                 'common_js' => array(
-                    'baseUrl' => '/site/js',
-                    'js' => array('js/appos.catalog-1.0.0.js'),
+                    'baseUrl' =>  'js/',
+                    'js' => array('script.js'),
                 ),
                 'common_css' => array(
-                    'baseUrl' => '/site/css',
-                    'css' => array('css/appos.catalog-3.0.0.css'),
+                    'baseUrl' => 'css/',
+                    'css' => array('style.css'),
                 ),
                 'common_resource' => array(
-                    'depends' => array('common_js','common_css'),
+                    'depends' => array('common_js', 'common_css'),
                 ),
+                /*'news_js' => array(
+                    'baseUrl' => Yii::getPathOfAlias('news') . '/js/',
+                    'js' => 'script.js'),
+                'news_css' => array(
+                    'baseUrl' => Yii::getPathOfAlias('news') . '/css/',
+                    'css' => array('style.css'),
+                ),
+                'news_resource' => array(
+                    'depends' => array('news_js', 'news_css'),
+                ),*/
             ),
+        ),
+        'image'=>array(
+            'class'=>'application.extensions.image.CImageComponent',
+            // GD or ImageMagick
+            'driver'=>'ImageMagick',
+            // ImageMagick setup path
+            'params'=>array('directory'=>'/usr/bin'),
         ),
 	),
     'theme'=>'bootstrap',

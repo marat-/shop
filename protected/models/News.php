@@ -45,7 +45,7 @@ class News extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('date_create, date, author, del', 'required'),
+			array('date_create, date, author', 'required'),
 			array('author, del', 'numerical', 'integerOnly'=>true),
 			array('image', 'length', 'max'=>150),
 			// The following rule is used by search().
@@ -74,9 +74,9 @@ class News extends CActiveRecord
 	{
 		return array(
 			'id' => 'ID',
-			'date_create' => 'Date Create',
-			'date' => 'Date',
-			'author' => 'Author',
+			'date_create' => 'Дата создания записи',
+			'date' => 'Дата новости',
+			'author' => 'ID Автора',
 			'del' => 'Del',
 			'image' => 'Image',
             'header' => 'Заголовок новости'
@@ -116,4 +116,14 @@ class News extends CActiveRecord
 			'criteria'=>$criteria,
 		));
 	}
+
+    protected function beforeSave () {
+        $this->date=date('Y-m-d',strtotime($this->date));
+        return parent::beforeSave ();
+    }
+
+    protected function afterFind () {
+        $this->date=date('d.m.Y H:i:s',strtotime($this->date));
+        return parent::afterFind ();
+    }
 }

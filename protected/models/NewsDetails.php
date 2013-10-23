@@ -73,10 +73,10 @@ class NewsDetails extends CActiveRecord
 		return array(
 			'id' => 'ID',
 			'news_id' => 'News',
-			'language_id' => 'Language',
-			'header' => 'Header',
-			'brief' => 'Brief',
-			'text' => 'Text',
+			'language_id' => 'ID языка',
+            "header" => 'Заголовок новости',
+            "brief" => 'Краткий текст новости',
+            "text" => 'Полный текст новости',
 		);
 	}
 

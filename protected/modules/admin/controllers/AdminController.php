@@ -15,6 +15,7 @@ class AdminController extends Controller {
 	}
 
     public function actionShowNews() {
+        //print_r(Yii::getPathOfAlias('webroot') . '/js/' ); die();
         list($newsController) = Yii::app()->createController('news/news/show');
         $newsController->actionShow();
     }

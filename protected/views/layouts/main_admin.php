@@ -4,11 +4,21 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />    
         <?php Yii::app()->bootstrap->register(); ?>
-        <?php echo '<pre>'; print_r(Yii::app()->clientScript->registerPackage('common_resources')); echo '</pre>';die(); ?>
         <!--[if lt IE 9]>
         <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/html5shiv/dist/html5shiv.js"></script>
         <![endif]-->
-        <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/style.css" />
+        <?php
+            Yii::app()->clientScript->registerScript('helpers', '
+              yii = {
+                  urls: {
+                      saveEdits: '.CJSON::encode(Yii::app()->createUrl('edit/save')).',
+                      base: '.CJSON::encode(Yii::app()->baseUrl).'
+                  }
+              };
+            ',CClientScript::POS_HEAD);
+        ?>
+        <?php Yii::app()->clientScript->registerScriptFile(Yii::app()->getAssetManager()->publish(Yii::getPathOfAlias('ext.cleditor.assets')) . '/jquery.cleditor.min.js');?>
+        <?php Yii::app()->clientScript->registerPackage('common_resource'); ?>
         <title><?php echo CHtml::encode($this->pageTitle); ?></title>
     </head>
 

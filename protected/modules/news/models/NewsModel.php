@@ -1,9 +1,10 @@
 <?php
 
 class NewsModel extends CFormModel {
-    public $email;
-    public $password;
-    public $rememberMe=false;
+    public $header;
+    public $brief;
+    public $text;
+    public $dateCreate;
 
     /**
     * Returns the static model of the specified AR class.
@@ -14,18 +15,17 @@ class NewsModel extends CFormModel {
         return parent::model($className);
     }
 
-    public function rules()
-    {
+    public function rules() {
         return array(
-            array('email, password', 'required', 'on'=>'login'),
-            array('rememberMe', 'boolean', 'on'=>'login'),
-            array('password', 'authenticate', 'on'=>'login'),
+            array('header, brief, text, date', 'required', 'on'=>'create'),
         );
     }
 
-    public function authenticate($attribute,$params) {
-        $this->_identity=new UserIdentity($this->username,$this->password);
-        if(!$this->_identity->authenticate())
-            $this->addError('password','Неправильное имя пользователя или пароль.');
+    public function attributeLabels() {
+        return array(
+            "header" => 'Заголовок новости',
+            "brief" => 'Краткий текст новости',
+            "text" => 'Полный текст новости',
+        );
     }
 }
