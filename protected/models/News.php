@@ -102,6 +102,7 @@ class News extends CActiveRecord
                 'params' => array(':languageId' => 1)
             ),
         );
+        $criteria->order = "t.id";
 
         $criteria->addSearchCondition('newsDetails.header',$this->header,true);
 

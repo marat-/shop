@@ -70,14 +70,42 @@ class NewsController extends Controller {
         if ($_POST['news_id'] != ''){
             $newsId = $_POST['news_id'];
             $oNewsModel = News::model()->findByPk($newsId);
-            $oNewsDetailsModel = NewsDetails::model()->find("news_id = " . $oNewsModel->id);
+            $oNewsGalleryModel = new NewsGallery('create');
+            $oNewsGalleryModel->images = $oNewsGalleryModel->findAll("news_id = " . $oNewsModel->id);
         } else {
             $oNewsModel = new News('create');
             $oNewsDetailsModel = new NewsDetails('create');
+            $oNewsGalleryModel = new NewsGallery('create');
         }
-
         Yii::app()->clientScript->corePackages = array();
-        $this->renderPartial('news_form', array("news_model" => $oNewsModel, "news_details_model" => $oNewsDetailsModel), false, true);
+
+        $oHbLanguages = new HbLanguages();
+        $arLanguages = $oHbLanguages->findAll();
+        ob_start();
+        $oFormInstance = $this->beginWidget('bootstrap.widgets.TbActiveForm', array(
+            'id' => 'news-form',
+            'htmlOptions' => array('class' => 'news-form', 'enctype' => 'multipart/form-data'),
+            'action'=>Yii::app()->request->baseUrl . '/news/news/edit',
+            'enableAjaxValidation'=>true,
+            'enableClientValidation'=>false,
+            'clientOptions' => array('validateOnSubmit' => true, 'validateOnChange' => true),
+        ));
+        $sFormRendered=ob_get_contents();
+        ob_end_clean();
+        //echo "<pre>"; print_r($oFormInstance); echo "</pre>";die();
+        foreach($arLanguages as $arLanguage) {
+            if($_POST['news_id']) {
+                $oNewsDetailsModel = NewsDetails::model()->find("news_id = " . $oNewsModel->id . " AND language_id = " . $arLanguage->id);
+            }
+            $arNewsDetailsForm[] = array(
+                'label'=>$arLanguage->name,
+                'content'=>$this->renderPartial('news_form', array("form" => $oFormInstance, "news_model" => $oNewsModel, "news_details_model" => $oNewsDetailsModel, "news_gallery_model" => $oNewsGalleryModel, "language_id" => $arLanguage->id), true, true),
+            );
+        }
+        $arNewsDetailsForm[0]['active'] = true;
+        //var_dump($arNewsDetailsForm);
+
+        $this->renderPartial('news_form_tabs', array("form" => $oFormInstance, "form_rendered" => $sFormRendered, "news_details_form" => $arNewsDetailsForm,"news_model" => $oNewsModel, "news_gallery_model" => $oNewsGalleryModel), false, true);
     }
 
     public function actionEdit() {
@@ -86,7 +114,6 @@ class NewsController extends Controller {
         } else {
             $oNewsModel = new News();
         }
-        $oNewsDetailsModel = new NewsDetails();
 
         if (isset($_POST['News'])) {
             $transaction = Yii::app()->db->beginTransaction();
@@ -96,31 +123,63 @@ class NewsController extends Controller {
             }
 
             if (isset($_POST['ajax']) && $_POST['ajax'] === 'news-form') {
-                echo CActiveForm::validate(array($oNewsModel, $oNewsDetailsModel));
+                echo CActiveForm::validate(array($oNewsModel));
                 Yii::app()->end();
             }
 
             if ($oNewsModel->save()){
-                $oNewsDetailsDel = NewsDetails::model()->find(array(
+                // Сохраняем детали новости
+                NewsDetails::model()->deleteAll(array(
                     'condition'=>'news_id=:news_id',
                     'params'=>array(':news_id'=>$oNewsModel->id),
                 ));
-                if($oNewsDetailsDel) {
-                    $oNewsDetailsDel->delete();
-                }
                 if (isset($_POST['NewsDetails'])){
+                    $oHbLanguages = new HbLanguages();
+                    $arLanguages = $oHbLanguages->findAll();
 
-                    $oNewsDetailsModel->attributes = $_POST['NewsDetails'];
-                    $oNewsDetailsModel->news_id = $oNewsModel->id;
-                    $oNewsDetailsModel->language_id = 1;
+                    //$oNewsDetailsModel->attributes = $_POST['NewsDetails'];
+                    $iSuccessDetailCount = 0;
+                    foreach($arLanguages as $arLanguage) {
+                        $oNewsDetailsModel = new NewsDetails();
+                        $oNewsDetailsModel->news_id = $oNewsModel->id;
+                        $oNewsDetailsModel->language_id = $arLanguage->id;
+                        $oNewsDetailsModel->header = $_POST['NewsDetails']['header'][$arLanguage->id];
+                        $oNewsDetailsModel->brief = $_POST['NewsDetails']['brief'][$arLanguage->id];
+                        $oNewsDetailsModel->text = $_POST['NewsDetails']['text'][$arLanguage->id];
+                        if($oNewsDetailsModel->save()) {
+                            $iSuccessDetailCount++;
+                        }
+                    }
 
-                    if ($oNewsDetailsModel->save()){
+                    if ($iSuccessDetailCount){
+                        // Сохраняем галерею фото
+                        NewsGallery::model()->deleteAll(array(
+                            'condition'=>'news_id=:news_id',
+                            'params'=>array(':news_id'=>$oNewsModel->id),
+                        ));
+                        if (isset($_POST['NewsGallery'])){
+                            $arImages = $_POST['NewsGallery']['image'];
+                            $arError = array();
+                            for ($i = 0; $i < sizeof($arImages); $i++){
+                                $oNewsGalleryModel = new NewsGallery();
+                                $oNewsGalleryModel->news_id = $oNewsModel->id;
+                                $oNewsGalleryModel->image = $arImages[$i];
+                                $oNewsGalleryModel->save();
+                                $arError[$i] = $oNewsGalleryModel->getErrors();
+                            }
+                        }
+                        for ($i = 0; $i < sizeof($arImages); $i++){
+                            if(sizeof($arError[$i]) > 0) {
+                                $transaction->rollback();
+                                echo "error";
+                                Yii::app()->end();
+                            }
+                        }
                         $transaction->commit();
                     } else {
                         $transaction->rollback();
                         echo "error";
                     }
-                    Yii::app()->end();
                 }
             } else {
                 $transaction->rollback();
@@ -148,6 +207,9 @@ class NewsController extends Controller {
         }
     }
 
+    /*
+     * Обработка загруженных изображений
+     */
     public function actionUploadImages() {
         Yii::import("ext.EAjaxUpload.qqFileUploader");
 
@@ -174,5 +236,39 @@ class NewsController extends Controller {
         $image->save($folder.'large-'.$fileName);
 
         echo $return;// it's array
+    }
+
+    public function actionGetNewsView() {
+        $newsId = $_POST['news_id'];
+        $oNewsModel = News::model()->findByPk($newsId);
+        $oNewsDetailsModel = NewsDetails::model()->find("news_id = " . $oNewsModel->id);
+        $oNewsGalleryModel = new NewsGallery('create');
+        $oNewsGalleryModel->images = $oNewsGalleryModel->findAll("news_id = " . $oNewsModel->id);
+
+        Yii::app()->clientScript->corePackages = array();
+        $this->renderPartial('news_view_form', array("news_model" => $oNewsModel, "news_details_model" => $oNewsDetailsModel, "news_gallery_model" => $oNewsGalleryModel), false, true);
+    }
+
+    public function renderButtons($data, $row) {
+        $this->widget('bootstrap.widgets.TbButtonGroup', array(
+            'size'=>'small',
+            'type'=>'info', // '', 'primary', 'info', 'success', 'warning', 'danger' or 'inverse'
+            'buttons'=>array(
+                array('label'=>'Действия', 'items'=>array(
+                    array('label'=>'Просмотр', 'url'=>'#', 'linkOptions'=>array(
+                        'class' => 'b-news-view',
+                        ),
+                    ),
+                    array('label'=>'Редактирование', 'url'=>'#', 'linkOptions'=>array(
+                        'class' => 'b-news-update',
+                        ),
+                    ),
+                    array('label'=>'Удаление', 'url'=>'#', 'linkOptions'=>array(
+                        'class' => 'b-news-delete',
+                        ),
+                    ),
+                )),
+            ),
+        ));
     }
 }

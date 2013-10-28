@@ -79,7 +79,7 @@
                             'type'=>'list',
                             'items'=>array(
                                 array('label'=>'Разделы'),
-                                array('label'=>'Новости', 'icon'=>'book', 'url'=> Yii::app()->createUrl("/admin/admin/news"), 'active'=>true),
+                                array('label'=>'Новости', 'icon'=>'book', 'url'=> Yii::app()->createUrl("/admin/admin/showNews"), 'active'=>true),
                                 array('label'=>'Продукция', 'icon'=>'icon-th', 'url'=>'#'),
                                 array('label'=>'Пользователи', 'icon'=>'icon-user', 'url'=>'#'),
                             ),

@@ -7,9 +7,13 @@
  * @property integer $id
  * @property integer $news_id
  * @property string $image
+ *
+ * The followings are the available model relations:
+ * @property News $news
  */
 class NewsGallery extends CActiveRecord
 {
+    public $images;
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.
@@ -20,7 +24,7 @@ class NewsGallery extends CActiveRecord
 		return parent::model($className);
 	}
 
-	/**
+    /**
 	 * @return string the associated database table name
 	 */
 	public function tableName()
@@ -53,6 +57,7 @@ class NewsGallery extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
+			'news' => array(self::BELONGS_TO, 'News', 'news_id'),
 		);
 	}
 

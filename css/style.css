@@ -2,3 +2,12 @@ body {
     padding-bottom: 40px;
     padding-top: 60px;
 }
+
+.remove-image,
+.remove-image-from-gallery {
+    vertical-align: top;
+}
+
+.tab-content {
+    overflow: hidden !important;
+}
