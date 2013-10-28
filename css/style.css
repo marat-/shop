@@ -11,3 +11,7 @@ body {
 .tab-content {
     overflow: hidden !important;
 }
+
+.row-closed td {
+    background-color: #E5B9B9 !important;
+}

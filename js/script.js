@@ -40,15 +40,17 @@ $(function() {
         });
     });
 
-    $(".b-news-delete").live("click", function() {
+    $(".b-news-delete, .b-news-restore").live("click", function() {
+        var action = $(this).hasClass('b-news-delete') ? 1 : 0;
         var news_id = $(this).closest('tr').attr('id');
-        if(confirm("Удалить новость ID " + news_id + " ?")) {
+        if(confirm((action ? "Удалить" : "Восстановить") + " новость ID " + news_id + " ?")) {
             $.ajax({
                 type: "POST",
                 async: false,
                 url: yii.urls.base + "/news/news/delete",
                 data: {
-                    news_id: news_id
+                    news_id: news_id,
+                    action: action
                 },
                 dataType: "html",
                 success: function(data){
@@ -99,4 +101,3 @@ function rescaleModalWindow(sel){
     $(sel).css('width', size.width * 0.4);
     $(sel).css('margin-left', size.width * 0.2 * -1);
 }
-$(window).bind("resize", rescale);

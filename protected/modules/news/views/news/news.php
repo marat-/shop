@@ -14,6 +14,7 @@
         'template'=>"{items}",
         'id'=>'news-grid',
         'rowHtmlOptionsExpression' => 'array("id"=>$data->primaryKey)',
+        'rowCssClassExpression'=>'$data->del?"row-closed":"row-open"',
         'columns'=>array(
             array('name'=>'id','htmlOptions'=>array('style'=>'width: 5%'),),
             array('name'=>'date','value' => 'date("d.m.Y", strtotime($data->date));','htmlOptions'=>array('style'=>'width: 10%'),),

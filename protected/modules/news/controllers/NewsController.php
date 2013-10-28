@@ -81,31 +81,18 @@ class NewsController extends Controller {
 
         $oHbLanguages = new HbLanguages();
         $arLanguages = $oHbLanguages->findAll();
-        ob_start();
-        $oFormInstance = $this->beginWidget('bootstrap.widgets.TbActiveForm', array(
-            'id' => 'news-form',
-            'htmlOptions' => array('class' => 'news-form', 'enctype' => 'multipart/form-data'),
-            'action'=>Yii::app()->request->baseUrl . '/news/news/edit',
-            'enableAjaxValidation'=>true,
-            'enableClientValidation'=>false,
-            'clientOptions' => array('validateOnSubmit' => true, 'validateOnChange' => true),
-        ));
-        $sFormRendered=ob_get_contents();
-        ob_end_clean();
-        //echo "<pre>"; print_r($oFormInstance); echo "</pre>";die();
         foreach($arLanguages as $arLanguage) {
             if($_POST['news_id']) {
                 $oNewsDetailsModel = NewsDetails::model()->find("news_id = " . $oNewsModel->id . " AND language_id = " . $arLanguage->id);
             }
             $arNewsDetailsForm[] = array(
                 'label'=>$arLanguage->name,
-                'content'=>$this->renderPartial('news_form', array("form" => $oFormInstance, "news_model" => $oNewsModel, "news_details_model" => $oNewsDetailsModel, "news_gallery_model" => $oNewsGalleryModel, "language_id" => $arLanguage->id), true, true),
+                'content'=>$this->renderPartial('news_form', array("news_model" => $oNewsModel, "news_details_model" => $oNewsDetailsModel, "news_gallery_model" => $oNewsGalleryModel, "language_id" => $arLanguage->id), true, true),
             );
         }
         $arNewsDetailsForm[0]['active'] = true;
-        //var_dump($arNewsDetailsForm);
 
-        $this->renderPartial('news_form_tabs', array("form" => $oFormInstance, "form_rendered" => $sFormRendered, "news_details_form" => $arNewsDetailsForm,"news_model" => $oNewsModel, "news_gallery_model" => $oNewsGalleryModel), false, true);
+        $this->renderPartial('news_form_tabs', array("news_details_form" => $arNewsDetailsForm,"news_model" => $oNewsModel, "news_gallery_model" => $oNewsGalleryModel), false, true);
     }
 
     public function actionEdit() {
@@ -191,19 +178,11 @@ class NewsController extends Controller {
 
     public function actionDelete() {
         $iNewsId = $_POST['news_id'];
+        $iAction = $_POST['action'];
         if ($iNewsId != ''){
             $oNewsModel=News::model()->findByPk($iNewsId);
-            $oNewsModel->del = 1;
+            $oNewsModel->del = $iAction;
             $oNewsModel->save();
-            /*$oNewsDetailsModel = NewsDetails::model()->find(array(
-                'condition'=>'news_id=:news_id',
-                'params'=>array(':news_id'=>$iNewsId),
-            ));
-            $oNewsDetailsModel->delete();
-            if($oNewsDetailsModel->deleteByPk($newsId)) {
-                $oNewsModel = new News();
-                $oNewsModel->deleteByPk($newsId);
-            }*/
         }
     }
 
@@ -250,25 +229,32 @@ class NewsController extends Controller {
     }
 
     public function renderButtons($data, $row) {
+        $arButtonItems = array('label'=>'Действия', 'items'=>array(
+                array('label'=>'Просмотр', 'url'=>'#', 'linkOptions'=>array(
+                        'class' => 'b-news-view',
+                    ),
+                ),
+                array('label'=>'Редактирование', 'url'=>'#', 'linkOptions'=>array(
+                        'class' => 'b-news-update',
+                    ),
+                ),
+            )
+        );
+        if($data->del == 0) {
+            $arButtonItems['items'][] =  array('label'=>'Удаление', 'url'=>'#', 'linkOptions'=>array(
+                    'class' => 'b-news-delete',
+                ),
+            );
+        } else {
+            $arButtonItems['items'][] =  array('label'=>'Восстановление', 'url'=>'#', 'linkOptions'=>array(
+                    'class' => 'b-news-restore',
+                ),
+            );
+        }
         $this->widget('bootstrap.widgets.TbButtonGroup', array(
             'size'=>'small',
-            'type'=>'info', // '', 'primary', 'info', 'success', 'warning', 'danger' or 'inverse'
-            'buttons'=>array(
-                array('label'=>'Действия', 'items'=>array(
-                    array('label'=>'Просмотр', 'url'=>'#', 'linkOptions'=>array(
-                        'class' => 'b-news-view',
-                        ),
-                    ),
-                    array('label'=>'Редактирование', 'url'=>'#', 'linkOptions'=>array(
-                        'class' => 'b-news-update',
-                        ),
-                    ),
-                    array('label'=>'Удаление', 'url'=>'#', 'linkOptions'=>array(
-                        'class' => 'b-news-delete',
-                        ),
-                    ),
-                )),
-            ),
+            'type'=>'info',
+            'buttons'=> array($arButtonItems),
         ));
     }
 }
