@@ -47,7 +47,6 @@ class NewsController extends Controller {
     public function actionShow() {
         $this->layout = '//layouts/main_admin';
         $arNews=new News("search");
-        //echo "<pre>";print_r($arNews); echo "</pre>";die();
         $arNews->unsetAttributes();
         if (isset($_GET['News'])){
             //Yii::app()->session['News'] = $_GET['News'];

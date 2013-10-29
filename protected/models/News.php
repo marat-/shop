@@ -98,11 +98,10 @@ class News extends CActiveRecord
         $criteria->with=array(
             'newsDetails'=>array(
                 'joinType'=>'LEFT JOIN',
-                'condition' => 'language_id = :languageId',
-                'params' => array(':languageId' => 1)
+                /*'condition' => 'language_id = :languageId',
+                'params' => array(':languageId' => 1)*/
             ),
         );
-        $criteria->order = "t.id";
 
         $criteria->addSearchCondition('newsDetails.header',$this->header,true);
 
@@ -115,6 +114,13 @@ class News extends CActiveRecord
 
         return new CActiveDataProvider($this, array(
 			'criteria'=>$criteria,
+            'sort'=>array(
+                'defaultOrder'=>'t.date',
+                'attributes'=>array('id','date',)
+            ),
+            'pagination'=>array(
+                'pageSize'=>20,
+            ),
 		));
 	}
 
@@ -124,7 +130,7 @@ class News extends CActiveRecord
     }
 
     protected function afterFind () {
-        $this->date=date('d.m.Y H:i:s',strtotime($this->date));
+        $this->date=date('d.m.Y',strtotime($this->date));
         return parent::afterFind ();
     }
 }

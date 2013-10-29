@@ -17,7 +17,6 @@
               };
             ',CClientScript::POS_HEAD);
         ?>
-        <?php Yii::app()->clientScript->registerScriptFile(Yii::app()->getAssetManager()->publish(Yii::getPathOfAlias('ext.cleditor.assets')) . '/jquery.cleditor.min.js');?>
         <?php Yii::app()->clientScript->registerPackage('common_resource'); ?>
         <title><?php echo CHtml::encode($this->pageTitle); ?></title>
     </head>
@@ -26,7 +25,7 @@
         <?php
         $this->widget('bootstrap.widgets.TbNavbar', array(
             'type' => 'inverse', // null or 'inverse'
-            'brand' => 'Project name',
+            'brand' => 'ОАО "Нэфис Косметикс"',
             'brandUrl' => '#',
             'collapse' => true, // requires bootstrap-responsive.css
             'items' => array(

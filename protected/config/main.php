@@ -98,22 +98,26 @@ return array(
         'clientScript' => array(
             'packages' => array(
                 'common_js' => array(
-                    'baseUrl' =>  'js/',
+                    'basePath' =>  'webroot.js',
                     'js' => array('script.js'),
                 ),
+                'extension_js' => array(
+                    'basePath' =>  'ext.cleditor.assets',
+                    'js' => array('jquery.cleditor.min.js'),
+                ),
                 'common_css' => array(
-                    'baseUrl' => 'css/',
+                    'basePath' => 'webroot.css',
                     'css' => array('style.css'),
                 ),
                 'common_resource' => array(
-                    'depends' => array('common_js', 'common_css'),
+                    'depends' => array('common_js', 'common_css', 'extension_js'),
                 ),
                 'news_js' => array(
-                    'basePath' => 'application.modules.news.js',
+                    'basePath' => 'news.js',
                     'js' => array('script.js')
                 ),
                 'news_css' => array(
-                    'basePath' => 'application.modules.news.css',
+                    'basePath' => 'news.css',
                     'css' => array('style.css'),
                 ),
                 'news_resource' => array(

@@ -11,14 +11,14 @@
         'type'=>'striped bordered condensed',
         'filter' => $gridDataProvider,
         'dataProvider'=>$gridDataProvider->search(),
-        'template'=>"{items}",
+        'template'=>"{summary} {pager} {items} {pager}",
         'id'=>'news-grid',
         'rowHtmlOptionsExpression' => 'array("id"=>$data->primaryKey)',
         'rowCssClassExpression'=>'$data->del?"row-closed":"row-open"',
         'columns'=>array(
             array('name'=>'id','htmlOptions'=>array('style'=>'width: 5%'),),
-            array('name'=>'date','value' => 'date("d.m.Y", strtotime($data->date));','htmlOptions'=>array('style'=>'width: 10%'),),
-            array('name'=>'header', 'value' => '$data->newsDetails[0]->header', 'htmlOptions'=>array('style'=>'width: 75%'),),
+            array('name'=>'date','value' => 'date("d.m.Y", strtotime($data->date));','htmlOptions'=>array('style'=>'width: 12%'),),
+            array('name'=>'header', 'value' => '$data->newsDetails[0]->header', 'htmlOptions'=>array('style'=>'width: 73%'),),
             array(
                 'value'=>array($this,'renderButtons'), 'htmlOptions'=>array('style'=>'width: 10%')
             ),
