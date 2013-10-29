@@ -1,4 +1,4 @@
-<?php// Yii::app()->clientScript->registerPackage('news_resource'); ?>
+<?php Yii::app()->clientScript->registerPackage('news_resource'); ?>
 <div class="span8">
     <?php $this->widget('bootstrap.widgets.TbButton', array(
         'buttonType'=>'button',

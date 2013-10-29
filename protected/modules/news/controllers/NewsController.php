@@ -78,6 +78,7 @@ class NewsController extends Controller {
             $oNewsGalleryModel = new NewsGallery('create');
         }
         Yii::app()->clientScript->corePackages = array();
+        //Yii::app()->clientScript->registerScript('news_resource');
 
         $oHbLanguages = new HbLanguages();
         $arLanguages = $oHbLanguages->findAll();

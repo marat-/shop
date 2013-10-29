@@ -108,16 +108,17 @@ return array(
                 'common_resource' => array(
                     'depends' => array('common_js', 'common_css'),
                 ),
-                /*'news_js' => array(
-                    'baseUrl' => Yii::getPathOfAlias('news') . '/js/',
-                    'js' => 'script.js'),
+                'news_js' => array(
+                    'basePath' => 'application.modules.news.js',
+                    'js' => array('script.js')
+                ),
                 'news_css' => array(
-                    'baseUrl' => Yii::getPathOfAlias('news') . '/css/',
+                    'basePath' => 'application.modules.news.css',
                     'css' => array('style.css'),
                 ),
                 'news_resource' => array(
                     'depends' => array('news_js', 'news_css'),
-                ),*/
+                ),
             ),
         ),
         'image'=>array(
