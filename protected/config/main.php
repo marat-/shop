@@ -7,6 +7,7 @@
 // CWebApplication properties can be configured here.
 
 Yii::setPathOfAlias('bootstrap', dirname(__FILE__).'/../extensions/bootstrap');
+$packages = require_once(dirname(__FILE__).'/packages.php');
 
 return array(
 	'basePath'=>dirname(__FILE__).DIRECTORY_SEPARATOR.'..',
@@ -96,34 +97,12 @@ return array(
             'class'=>'bootstrap.components.Bootstrap',
         ),
         'clientScript' => array(
-            'packages' => array(
-                'common_js' => array(
-                    'basePath' =>  'webroot.js',
-                    'js' => array('script.js'),
-                ),
-                'extension_js' => array(
-                    'basePath' =>  'ext.cleditor.assets',
-                    'js' => array('jquery.cleditor.min.js'),
-                ),
-                'common_css' => array(
-                    'basePath' => 'webroot.css',
-                    'css' => array('style.css'),
-                ),
-                'common_resource' => array(
-                    'depends' => array('common_js', 'common_css', 'extension_js'),
-                ),
-                'news_js' => array(
-                    'basePath' => 'news.js',
-                    'js' => array('script.js')
-                ),
-                'news_css' => array(
-                    'basePath' => 'news.css',
-                    'css' => array('style.css'),
-                ),
-                'news_resource' => array(
-                    'depends' => array('news_js', 'news_css'),
-                ),
+            'packages' => $packages,
+            'class' => 'CClientScript',
+            'scriptMap' => array(
+                'jquery.js'=>false,
             ),
+            'coreScriptPosition' => CClientScript::POS_BEGIN,
         ),
         'image'=>array(
             'class'=>'application.extensions.image.CImageComponent',
@@ -132,7 +111,10 @@ return array(
             // ImageMagick setup path
             'params'=>array('directory'=>'/usr/bin'),
         ),
-	),
+        'request'=>array(
+            'enableCsrfValidation'=>true,
+        ),
+    ),
     'theme'=>'bootstrap',
     // application-level parameters that can be accessed
 	// using Yii::app()->params['paramName']

@@ -1,0 +1,115 @@
+.auth-container {
+    min-width: 1050px;
+}
+.sign-in-container {
+    min-width: 470px;
+}
+.form-signin {
+    background-color: #FFFFFF;
+    border: 1px solid #E5E5E5;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    min-height: 285px;
+    max-width: 400px;
+    min-width: 400px;
+    padding: 19px 29px 29px;
+}
+.form-signin .form-signin-heading, .form-signin .checkbox {
+    margin-bottom: 15px;
+}
+.form-signin input[type="text"] {
+    font-size: 16px;
+    height: auto;
+    margin-bottom: 25px;
+    padding: 7px 9px;
+}
+
+.form-signin input[type="password"] {
+    font-size: 16px;
+    height: auto;
+    margin-bottom: 25px;
+    padding: 7px 9px;
+}
+
+.message-container {
+    min-height: 45px;
+    margin-bottom: 10px;
+}
+
+.form-logon-heading-container {
+    padding-top: 5px;
+}
+
+.form-logon-heading {
+    color: #5A5A5A;
+}
+
+.form-ad {
+    background-color: #FFFFFF;
+    border: 1px solid #E5E5E5;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    min-height: 285px;
+    max-width: 400px;
+    padding: 19px 29px 29px;
+    margin: 0 0 0 -37px;
+}
+
+.captcha-container input {
+    min-height: 30px;
+    width: 61%;
+}
+
+.captcha-container img {
+    margin-bottom: 25px;
+}
+
+.new-password-container {
+    position: relative;
+}
+
+.change-password {
+    margin-left: 5px;
+}
+.password-strength {
+    background-color: #F5F5F5;
+    display: inline-block;
+    float: right;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    position: absolute;
+    right: 1px;
+    top:1px;
+}
+.password-strength td{
+    width: 50px;
+    border-left: 1px solid #EAE8E8;
+    height: 32px;
+}
+.password-strength td:first-child{
+    border-left: none;
+}
+
+.password-meter-weak,
+.password-meter-very-weak,
+.password-meter-similar-to-username,
+.password-meter-too-short{
+    background-color: #E5C885;
+}
+.password-meter-good {
+    background-color: #89A8C6;
+}
+.password-meter-strong {
+    background-color: #557F55;
+}
+.enter-problems {
+    margin-top: 10px;
+    display: block;
+    float: right;
+}
+
+.enter-problems a {
+    cursor: pointer;
+}

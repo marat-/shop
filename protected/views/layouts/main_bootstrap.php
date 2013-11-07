@@ -2,7 +2,8 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />    
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <?php Yii::app()->clientScript->registerPackage('common_resource'); ?>
         <?php Yii::app()->bootstrap->register(); ?>
         <!--[if lt IE 9]>
         <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/html5shiv/dist/html5shiv.js"></script>
@@ -15,7 +16,7 @@
         <?php
         $this->widget('bootstrap.widgets.TbNavbar', array(
             'type' => 'inverse', // null or 'inverse'
-            'brand' => 'Project name',
+            'brand' => 'ОАО "Нэфис Косметикс"',
             'brandUrl' => '#',
             'collapse' => true, // requires bootstrap-responsive.css
             'items' => array(
