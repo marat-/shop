@@ -37,6 +37,13 @@
                     ),
                 ),
                 '<form class="navbar-search pull-left" action=""><input type="text" class="search-query span3" placeholder="Поиск"></form>',
+                $this->widget('bootstrap.widgets.TbProgress', array(
+                    'type'=>'info', // 'info', 'success' or 'danger'
+                    'percent'=>100, // the progress
+                    'striped'=>true,
+                    'animated'=>true,
+                    'htmlOptions'=> array('class' => 'pull-right span1 nav', 'id'=>'loadProgress'),
+                ), true),
                 array(
                     'class' => 'bootstrap.widgets.TbMenu',
                     'htmlOptions' => array('class' => 'pull-right'),

@@ -11,7 +11,7 @@ return array(
     ),
     'common_js' => array(
         'basePath' =>  'webroot.js',
-        'js' => array('script.js', 'script_func.js'),
+        'js' => array('script_func.js', 'script_init.js', 'script.js'),
         'depends' => array('common_plugins'),
     ),
     'extension_js' => array(

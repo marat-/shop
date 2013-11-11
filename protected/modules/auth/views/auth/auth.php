@@ -22,6 +22,9 @@
             )); ?>
                 <h3 class="form-signin-heading">Авторизация</h3>
                 <div class="message-container">
+                    <?if(isset($error) && $error):?>
+                        <span class="text-error"><?=$error;?></span>
+                    <?endif;?>
                     <noscript>
                         <div class="error" id="js_error">
                             <span class="text-error">Ваш браузер не поддерживает JavaScript. Работа на портале будет невозможна!</span>
@@ -37,17 +40,27 @@
                     </div>
                 </div>
                 <?php echo $form->textField($user,'email', array('class'=>'login input-block-level', 'placeholder'=>'Email')); ?>
-                <?php echo $form->error($user,'email'); ?>
+                <?php// echo $form->error($user,'email'); ?>
                 <?php echo $form->passwordField($user,'password', array('class'=>'login input-block-level', 'placeholder'=>'Пароль')); ?>
-                <?php echo $form->error($user,'password'); ?>
-                <div class="captcha-container hidden"></div>
-
-                <?php echo CHtml::ajaxSubmitButton('Войти',
-                    array('/auth/auth/check'),
+                <?php// echo $form->error($user,'password'); ?>
+                <div class="captcha-container">
+                    <?php if ($user->scenario == 'withCaptcha' && CCaptcha::checkRequirements()): ?>
+                        <div class='captcha-image'>
+                            <?php $this->widget('CCaptcha'); ?>
+                        </div>
+                        <div>
+                            <?php echo $form->textField($user, 'verifyCode', array('class'=>'login input-block-level', 'placeholder'=>'Введите проверочный код')); ?>
+                        </div>
+                        <?php// echo $form->error($user, 'verifyCode'); ?>
+                    <?php endif; ?>
+                </div>
+                <div class="clearfix"></div>
+                <?php echo CHtml::submitButton('Войти',
+                    /*array('/auth/auth/check'),
                     array(
                         'dataType'=>'json',
                         'success'=>'function(data) {formSubmitHandler(data, $("#auth-form"))}',
-                    ),
+                    ),*/
                     array("class"=>"btn btn-large btn-primary", "id" => "enter")
                 );
                 ?>

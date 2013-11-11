@@ -57,13 +57,22 @@
     margin: 0 0 0 -37px;
 }
 
+.captcha-container {
+    margin-bottom: 30px;
+}
+
 .captcha-container input {
     min-height: 30px;
-    width: 61%;
+    width: 66%;
+    margin-top: 10px;
 }
 
 .captcha-container img {
-    margin-bottom: 25px;
+    display: block;
+}
+
+.captcha-image {
+    float: left;
 }
 
 .new-password-container {

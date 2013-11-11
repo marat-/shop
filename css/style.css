@@ -2,3 +2,8 @@ body {
     padding-bottom: 40px;
     padding-top: 60px;
 }
+
+#loadProgress {
+    margin-top: 10px;
+    visibility: hidden;
+}

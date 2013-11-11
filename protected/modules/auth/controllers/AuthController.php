@@ -5,9 +5,26 @@ class AuthController extends Controller {
 
 	public function actionIndex() {
         Yii::app()->request->cookies['cookie_check'] = new CHttpCookie('cookie_check', 1);
-        $oUsers = new Users('login');
-        $this->render('auth', array("user" => $oUsers));
+        if(!Yii::app()->session['authScenario']) {
+            Yii::app()->session['authScenario'] = 'login';
+        }
+        if(Yii::app()->session['authModel']) {
+            $oAuthModel = Yii::app()->session['authModel'];
+        } else {
+            $oAuthModel = new AuthModel(Yii::app()->session['authScenario']);
+        }
+        $sResult = Yii::app()->session['authResult'];
+        $this->render('auth', array("user" => $oAuthModel, "error" => $sResult));
 	}
+
+    public function actions() {
+        return array(
+            'captcha'=>array(
+                'class'=>'CCaptchaAction',
+                'backColor'=>0xEBF4FB,
+            ),
+        );
+    }
 
     /**
      * Проверка введенных пользователем логина/пароля или проверочного кода
@@ -17,40 +34,102 @@ class AuthController extends Controller {
      * либо логическое (bool) TRUE, когда ошибок не возникает.
      */
     public function actionCheck() {
-        $arUserData = Yii::app()->request->getPost('Users');
+        $arUserData = Yii::app()->request->getPost('AuthModel');
         $sEmail = trim($arUserData['email']);
         $sPassword = trim($arUserData['password']);
         $sIp = $this->get_user_ip();
 
+        // Логгируем попытку входа
+        $oLoginAttemptsModel = new SpLoginAttempts();
         $arLoginData = array(
-            "login" => $sEmail,
+            "email" => $sEmail,
             "referrer" => Yii::app()->getBaseUrl(true),
-            "ip" => $sIp
+            "ip" => $sIp,
+            //"date_create" => date("Y-m-d H:i:s")
         );
 
-        // Проверяем корректность пары логин-пароль или смену пароля
-        $oIdentity=new UserIdentity($sEmail, $sPassword);
-        if($oIdentity->authenticate()) {
-            Yii::app()->user->login($oIdentity);
-            echo "true";
-        }
-        else {
-            echo json_encode(array("msg" => 'error|' . $oIdentity->errorMessage, "html_msg" => isset($sCaptchaView) ? $sCaptchaView : ""));
-        }
-
-
-        /*$sCaptcha = trim(Yii::app()->request->getPost('captcha'));
-        if(($m = $this->logon($sEmail, $sPassword, $sCaptcha))) {
-            $this->show_data(json_encode($m), "json");
-            $arLoginData['error'] = $m['emb_msg'];
-            $arLoginData['success'] = 0;
+        $oAuthModel = new AuthModel();
+        if($this->isCaptchaNeed($oLoginAttemptsModel, $arUserData)) {
+            $oAuthModel->scenario = 'withCaptcha';
         } else {
-            $this->show_data(json_encode(true), "json");
-            $arLoginData['success'] = 1;
+            $oAuthModel->scenario = 'login';
         }
-        $this->user_model->dbInsert("gamma.dbo.sp_login_attempts", $arLoginData);*/
 
+        // Проверяем корректность пары логин-пароль
+        if (!empty($arUserData)) {
+            $oAuthModel->attributes = $arUserData;
+            // Проверяем правильность данных
+            if(Yii::app()->session['authScenario'] == 'login' && $oAuthModel->scenario == 'withCaptcha') {
+                $sResult = 'Введите проверочный код';
+                Yii::app()->session['authScenario'] = 'withCaptcha';
+            } else {
+                if($oAuthModel->validate()) {
+                    // если всё ок
+                    $arLoginData['success'] = 1;
+                } else {
+                    //print_r($oAuthModel->getErrors());
+                    $arResult = $oAuthModel->getErrors();
+                    $sResult = "";
+                    foreach($arResult as $key=>$value) {
+                        $sResult .= $value[0] . '<br />';
+                    }
+                    $arLoginData['success'] = 0;
+                    $arLoginData['error'] = $sResult;
 
+                    // Проверяем необходимость в показе капчи
+                    if(Yii::app()->request->isAjaxRequest) {
+                        echo json_encode(array("msg" => 'error|' . $sResult));
+                    }
+                }
+            }
+        }
+
+        $oLoginAttemptsModel->attributes = $arLoginData;
+        $oLoginAttemptsModel->save();
+
+        if($arLoginData['success'] == 1) {
+            unset(Yii::app()->session['authScenario']);
+            unset(Yii::app()->session['authResult']);
+            unset(Yii::app()->session['authModel']);
+            $this->redirect(Yii::app()->getBaseUrl(true) . '/admin');
+        } else {
+            Yii::app()->session['authResult'] = $sResult;
+            Yii::app()->session['authModel'] = $oAuthModel;
+            $this->redirect(Yii::app()->getBaseUrl(true) . '/auth');
+        }
+        //$this->render('auth', array("user" => $oAuthModel, "error" => $sResult));
+
+        // Проверяем является ли пользователь гостем
+        // ведь если он уже зарегистрирован - формы он не должен увидеть.
+        /*if (!Yii::app()->user->isGuest) {
+            echo true;
+        } else {*/
+
+        //}
+    }
+
+    /**
+     * Проверка необходимости капчи
+     */
+    private function isCaptchaNeed($oLoginAttemptsModel, $arUserData) {
+        $criteria= new CDbCriteria();
+        $criteria->compare('success', 0);
+        $criteria->compare('ip', $arUserData['ip']);
+        $criteria->compare('UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(date_create)', '< ' . Yii::app()->params['loginAttemptsCheckPeriod'] * 60);
+        $criteria->compare('email', $arUserData['email']);
+        $iLoginAtemptsCount = $oLoginAttemptsModel->count($criteria);
+
+        $criteria= new CDbCriteria();
+        $criteria->compare('success', 1);
+        $criteria->compare('ip', $arUserData['ip']);
+        $criteria->compare('UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(date_create)', '< ' . Yii::app()->params['loginAttemptsCheckPeriod'] * 60);
+        $criteria->compare('email', $arUserData['email']);
+        $iSuccessLoginAtemptsCount = $oLoginAttemptsModel->count($criteria);
+        if($iLoginAtemptsCount < Yii::app()->params['loginAttempts'] || $iSuccessLoginAtemptsCount > 0) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     public function actionGenPass()

@@ -3,6 +3,7 @@
 class AuthModel extends CFormModel {
     public $email;
     public $password;
+    public $verifyCode;
     public $rememberMe=false;
 
     /**
@@ -17,15 +18,40 @@ class AuthModel extends CFormModel {
     public function rules()
     {
         return array(
-            array('email, password', 'required', 'on'=>'login'),
-            array('rememberMe', 'boolean', 'on'=>'login'),
-            array('password', 'authenticate', 'on'=>'login'),
+            array('email, password', 'required', 'on'=>'login, withCaptcha'),
+            array('rememberMe', 'boolean', 'on'=>'login, withCaptcha'),
+            array('password', 'authenticate', 'on'=>'login, withCaptcha', 'skipOnError'=>'true'),
+            array('verifyCode', 'captcha', 'allowEmpty' => !CCaptcha::checkRequirements(), 'on' => 'withCaptcha', 'skipOnError'=>'true'),
+        );
+    }
+
+    public function attributeLabels()
+    {
+        return array(
+            'id' => 'ID',
+            'email' => 'Адрес электронной почты',
+            'name' => 'Name',
+            'second_name' => 'Second Name',
+            'surname' => 'Surname',
+            'password' => 'Пароль',
+            'telephone' => 'Telephone',
+            'address' => 'Address',
+            'city' => 'City',
+            'gender_id' => 'Gender',
+            'active' => 'Active',
+            'description' => 'Description',
+            'verifyCode' => 'Проверочный код',
         );
     }
 
     public function authenticate($attribute,$params) {
-        $this->_identity=new UserIdentity($this->username,$this->password);
-        if(!$this->_identity->authenticate())
-            $this->addError('password','Неправильное имя пользователя или пароль.');
+        // Проверяем корректность пары логин-пароль или смену пароля
+        $oIdentity=new UserIdentity($this->email, $this->password);
+        if($oIdentity->authenticate()) {
+            Yii::app()->user->login($oIdentity);
+        }
+        else {
+            $this->addError('result',$oIdentity->errorMessage);
+        }
     }
 }

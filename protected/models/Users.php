@@ -75,11 +75,11 @@ class Users extends CActiveRecord
 	{
 		return array(
 			'id' => 'ID',
-			'email' => 'Email',
+			'email' => 'Адрес электронной почты',
 			'name' => 'Name',
 			'second_name' => 'Second Name',
 			'surname' => 'Surname',
-			'password' => 'Password',
+			'password' => 'Пароль',
 			'telephone' => 'Telephone',
 			'address' => 'Address',
 			'city' => 'City',
