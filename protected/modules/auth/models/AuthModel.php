@@ -19,9 +19,11 @@ class AuthModel extends CFormModel {
     {
         return array(
             array('email, password', 'required', 'on'=>'login, withCaptcha'),
+            array('email', 'email', 'on'=>'login, withCaptcha'),
             array('rememberMe', 'boolean', 'on'=>'login, withCaptcha'),
             array('password', 'authenticate', 'on'=>'login, withCaptcha', 'skipOnError'=>'true'),
-            array('verifyCode', 'captcha', 'allowEmpty' => !CCaptcha::checkRequirements(), 'on' => 'withCaptcha', 'skipOnError'=>'true'),
+            array('verifyCode', 'captcha', 'allowEmpty' => !CCaptcha::checkRequirements(), 'on' => 'withCaptcha, restore', 'skipOnError'=>'true'),
+            array('email', 'required', 'on'=>'restore'),
         );
     }
 
@@ -42,16 +44,5 @@ class AuthModel extends CFormModel {
             'description' => 'Description',
             'verifyCode' => 'Проверочный код',
         );
-    }
-
-    public function authenticate($attribute,$params) {
-        // Проверяем корректность пары логин-пароль или смену пароля
-        $oIdentity=new UserIdentity($this->email, $this->password);
-        if($oIdentity->authenticate()) {
-            Yii::app()->user->login($oIdentity);
-        }
-        else {
-            $this->addError('result',$oIdentity->errorMessage);
-        }
     }
 }

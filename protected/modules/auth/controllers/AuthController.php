@@ -11,7 +11,7 @@ class AuthController extends Controller {
         if(Yii::app()->session['authModel']) {
             $oAuthModel = Yii::app()->session['authModel'];
         } else {
-            $oAuthModel = new AuthModel(Yii::app()->session['authScenario']);
+            $oAuthModel = new Users(Yii::app()->session['authScenario']);
         }
         $sResult = Yii::app()->session['authResult'];
         $this->render('auth', array("user" => $oAuthModel, "error" => $sResult));
@@ -34,9 +34,8 @@ class AuthController extends Controller {
      * либо логическое (bool) TRUE, когда ошибок не возникает.
      */
     public function actionCheck() {
-        $arUserData = Yii::app()->request->getPost('AuthModel');
+        $arUserData = Yii::app()->request->getPost('Users');
         $sEmail = trim($arUserData['email']);
-        $sPassword = trim($arUserData['password']);
         $sIp = $this->get_user_ip();
 
         // Логгируем попытку входа
@@ -45,10 +44,9 @@ class AuthController extends Controller {
             "email" => $sEmail,
             "referrer" => Yii::app()->getBaseUrl(true),
             "ip" => $sIp,
-            //"date_create" => date("Y-m-d H:i:s")
         );
 
-        $oAuthModel = new AuthModel();
+        $oAuthModel = new Users();
         if($this->isCaptchaNeed($oLoginAttemptsModel, $arUserData)) {
             $oAuthModel->scenario = 'withCaptcha';
         } else {
@@ -97,15 +95,6 @@ class AuthController extends Controller {
             Yii::app()->session['authModel'] = $oAuthModel;
             $this->redirect(Yii::app()->getBaseUrl(true) . '/auth');
         }
-        //$this->render('auth', array("user" => $oAuthModel, "error" => $sResult));
-
-        // Проверяем является ли пользователь гостем
-        // ведь если он уже зарегистрирован - формы он не должен увидеть.
-        /*if (!Yii::app()->user->isGuest) {
-            echo true;
-        } else {*/
-
-        //}
     }
 
     /**
@@ -132,12 +121,12 @@ class AuthController extends Controller {
         }
     }
 
-    public function actionGenPass()
+    public function actionGenPass($sPassword)
     {
-        $user = new Users();
+        /*$user = new Users();
         echo (CRYPT_BLOWFISH === 1) ? 'CRYPT_BLOWFISH is enabled!' : 'CRYPT_BLOWFISH is not available';
-        var_dump(CRYPT_BLOWFISH);
-        //var_dump(crypt('byrke5l8byu', $this->generateSalt()));
+        var_dump(CRYPT_BLOWFISH);*/
+        return crypt($sPassword, $this->generateSalt());
     }
 
     function generateSalt($cost = 13)
@@ -154,5 +143,95 @@ class AuthController extends Controller {
         $salt = '$2a$' . str_pad((int) $cost, 2, '0', STR_PAD_RIGHT) . '$';
         $salt .= strtr(substr(base64_encode($rand), 0, 22), array('+' => '.'));
         return $salt;
+    }
+
+    function actionRestore() {
+        Yii::app()->request->cookies['cookie_check'] = new CHttpCookie('cookie_check', 1);
+        if(!Yii::app()->session['authScenario']) {
+            Yii::app()->session['authScenario'] = 'login';
+        }
+        if(Yii::app()->session['authModel']) {
+            $oAuthModel = Yii::app()->session['authModel'];
+        } else {
+            $oAuthModel = new Users(Yii::app()->session['authScenario']);
+        }
+        $sResult = Yii::app()->session['authResult'];
+        $this->render('password_restore', array("user" => $oAuthModel, "error" => $sResult));
+    }
+
+    function actionRestoreCheck() {
+        $arRestoreData = Yii::app()->request->getPost('Users');
+        $sEmail = trim($arRestoreData['email']);
+        // Логируем попытку смены пароля
+        $oLoginAttemptsModel = new SpLoginAttempts();
+        $arLoginData = array(
+            "email" => $sEmail,
+            "referrer" => Yii::app()->getBaseUrl(true),
+            "ip" => $this->get_user_ip()
+        );
+
+        $oAuthModel = new Users('restore');
+        $oAuthModel->attributes = $arRestoreData;
+        // Проверяем правильность данных
+        if($oAuthModel->validate()) {
+            $arLoginData['success'] = 1;
+            $sPassword = $this->generatePassword();
+
+            $oUsersModel=Users::model()->find(("email = '$oAuthModel->email'"));
+            $oUsersModel->password = $this->actionGenPass($sPassword);
+            if ($oUsersModel->save()){
+                Yii::app()->mail->viewPath = 'application.modules.auth.views.auth';
+                $message = new YiiMailMessage;
+                $message->view = 'password_changed_letter';
+                $message->setBody(array('password'=>$sPassword), 'text/html');
+                $message->addTo($oAuthModel->email);
+                $message->from = Yii::app()->params['adminEmail'];
+                Yii::app()->mail->send($message);
+                Yii::app()->user->setFlash('success', "Пароль успешно изменен и выслан на указанный адрес электронной почты!");
+            } else {
+                Yii::app()->user->setFlash('error', "Произошла ошибка при изменении пароля!");
+            }
+        } else {
+            $arResult = $oAuthModel->getErrors();
+            $sResult = "";
+            foreach($arResult as $key=>$value) {
+                $sResult .= $value[0] . '<br />';
+            }
+            $arLoginData['success'] = 0;
+            $arLoginData['error'] = $sResult;
+        }
+
+        $oLoginAttemptsModel->attributes = $arLoginData;
+        $oLoginAttemptsModel->save();
+
+        if($arLoginData['success']) {
+            unset(Yii::app()->session['authScenario']);
+            unset(Yii::app()->session['authResult']);
+            unset(Yii::app()->session['authModel']);
+            $this->redirect(Yii::app()->getBaseUrl(true) . '/auth');
+        } else {
+            Yii::app()->session['authResult'] = $sResult;
+            Yii::app()->session['authModel'] = $oAuthModel;
+            $this->redirect(Yii::app()->getBaseUrl(true) . '/auth/auth/restore');
+        }
+    }
+
+    /**
+     * Генератор пароля
+     */
+    private function generatePassword() {
+        // Символы, которые будут использоваться в пароле.
+        $arChars="qazxswedcvfrtgbnhyujmkiolp1234567890QAZXSWEDCVFRTGBNHYUJMKIOLP!@#$%^&*()-+";
+        $arDigits="1234567890";
+        // Определяем количество символов
+        $iSize=strlen($arChars) - 1;
+        $iDigitSize=strlen($arDigits) - 1;
+        // Определяем пустую переменную, в которую и будем записывать символы.
+        $sPassword = "";
+        // Создаём пароль.
+        for($i=6;$i>=0;$i--) {
+            $sPassword .= !($i%2) ? $arChars[rand(0,$iSize)] : $arDigits[rand(0,$iDigitSize)];
+        }
+        return $sPassword;
     }
 }

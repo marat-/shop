@@ -19,6 +19,8 @@
  */
 class Users extends CActiveRecord
 {
+    public $rememberMe=false;
+    public $verifyCode;
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.
@@ -45,15 +47,25 @@ class Users extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('email, name, password', 'required'),
-			array('active', 'numerical', 'integerOnly'=>true),
-			array('email, name, second_name, surname, telephone, city', 'length', 'max'=>255),
-			array('password', 'length', 'max'=>128),
-			array('address, description', 'length', 'max'=>2048),
-			array('gender_id', 'length', 'max'=>10),
+			array('email, name, password', 'required', 'on'=>'insert'),
+			array('active', 'numerical', 'integerOnly'=>true, 'on'=>'insert'),
+			array('email, name, second_name, surname, telephone, city', 'length', 'max'=>255, 'on'=>'insert'),
+			array('password', 'length', 'max'=>128, 'on'=>'insert'),
+			array('address, description', 'length', 'max'=>2048, 'on'=>'insert'),
+			array('gender_id', 'length', 'max'=>10, 'on'=>'insert'),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
 			array('id, email, name, second_name, surname, password, telephone, address, city, gender_id, active, description', 'safe', 'on'=>'search'),
+
+            array('email, password', 'required', 'on'=>'login, withCaptcha'),
+            array('email', 'email', 'on'=>'login, withCaptcha'),
+            array('rememberMe', 'boolean', 'on'=>'login, withCaptcha'),
+            array('password', 'authenticate', 'on'=>'login, withCaptcha', 'skipOnError'=>'true'),
+            array('verifyCode', 'captcha', 'allowEmpty' => !CCaptcha::checkRequirements(), 'on' => 'withCaptcha, restore', 'skipOnError'=>'true'),
+
+            array('email', 'required', 'on'=>'restore'),
+            array('email', 'required', 'on'=>'restore'),
+            array('email', 'checkAvailable', 'on'=>'restore'),
 		);
 	}
 
@@ -86,6 +98,8 @@ class Users extends CActiveRecord
 			'gender_id' => 'Gender',
 			'active' => 'Active',
 			'description' => 'Description',
+            'verifyCode' => 'Проверочный код',
+            'rememberMe' => 'Запомнить меня'
 		);
 	}
 
@@ -142,5 +156,31 @@ class Users extends CActiveRecord
         $salt = '$2a$' . str_pad((int) $cost, 2, '0', STR_PAD_RIGHT) . '$';
         $salt .= strtr(substr(base64_encode($rand), 0, 22), array('+' => '.'));
         return $salt;
+    }
+
+    public function authenticate($attribute,$params) {
+        // Проверяем корректность пары логин-пароль или смену пароля
+        $oIdentity=new UserIdentity($this->email, $this->password);
+        if($oIdentity->authenticate()) {
+            Yii::app()->user->login($oIdentity);
+        }
+        else {
+            $this->addError('result',$oIdentity->errorMessage);
+        }
+    }
+
+    public function checkAvailable($attribute,$params) {
+        $criteria= new CDbCriteria();
+        $criteria->compare('email', $this->email);
+        $bEmailExist = $this->count($criteria);
+        if(!$bEmailExist) {
+            $this->addError($attribute, "Данный email не зарегистрирован в системе.");
+        }
+    }
+
+    public function beforeSave() {
+        $this->date_update = new CDbExpression('NOW()');
+
+        return parent::beforeSave();
     }
 }

@@ -20,6 +20,7 @@ return array(
 	'import'=>array(
 		'application.models.*',
 		'application.components.*',
+        'ext.mail.YiiMailMessage',
 	),
 
 	'modules'=>array(
@@ -50,6 +51,13 @@ return array(
 			// enable cookie-based authentication
 			'allowAutoLogin'=>true,
 		),
+        'mail' => array(
+            'class' => 'ext.mail.YiiMail',
+            'transportType' => 'php',
+            'viewPath' => 'application.views.mail',
+            'logging' => true,
+            'dryRun' => false
+        ),
 		'urlManager'=>array(
 			'urlFormat'=>'path',
             'showScriptName'=>false,
@@ -85,12 +93,14 @@ return array(
                     'showInFireBug' => true,
                     'categories'=>'system.db.CDbCommand.query, application'
 				),
-				// uncomment the following to show log messages on web pages
-				/*
-				array(
-					'class'=>'CWebLogRoute',
-				),
-				*/
+                array(
+                    'class'=>'CFileLogRoute',
+                    'levels'=>'error, warning',
+                ),
+                array(
+                    'class'=>'CProfileLogRoute',
+                    'enabled'=>true,
+                ),
 			),
 		),
         'bootstrap'=>array(
