@@ -23,6 +23,7 @@
                 <h3 class="form-signin-heading">Восстановление пароля</h3>
                 <div class="message-container">
                     <span class="text-info">Введите email, который был указан при регистрации.</span>
+                    <br />
                     <?if(isset($error) && $error):?>
                         <span class="text-error"><?=$error;?></span>
                     <?endif;?>

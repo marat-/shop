@@ -85,5 +85,16 @@ function formSubmitHandler(data, form) {
  * Отображение скрытого бутстрап поля
  */
 function fadeInBsElem(elem) {
-    $(elem).css("visibility","visible").hide().fadeIn().removeClass("hidden");
+    $(elem).css("visibility","visible").fadeIn().removeClass("hidden");
+}
+
+function removeCLEditorInstances() {
+    for(var i in cleditor_instances) {
+        var editor = cleditor_instances[i][0];
+        // Remove the editor
+        editor.$area.insertBefore(editor.$main); // Move the textarea out of the main div
+        editor.$area.removeData("cleditor"); // Remove the cleditor pointer from the textarea
+        editor.$main.remove(); // Remove the main div and all children from the DOM
+    }
+    cleditor_instances = [];
 }

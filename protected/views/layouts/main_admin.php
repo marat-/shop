@@ -2,7 +2,8 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />    
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <?php Yii::app()->clientScript->registerPackage('jquery_js'); ?>
         <?php Yii::app()->bootstrap->register(); ?>
         <!--[if lt IE 9]>
         <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/html5shiv/dist/html5shiv.js"></script>
@@ -46,25 +47,30 @@
                     ),
                 ),
                 '<form class="navbar-search pull-left" action=""><input type="text" class="search-query span3" placeholder="Поиск"></form>',
+                $this->widget('bootstrap.widgets.TbProgress', array(
+                    'type'=>'info', // 'info', 'success' or 'danger'
+                    'percent'=>100, // the progress
+                    'striped'=>true,
+                    'animated'=>true,
+                    'htmlOptions'=> array('class' => 'pull-right span1 nav', 'id'=>'loadProgress'),
+                ), true),
                 array(
                     'class' => 'bootstrap.widgets.TbMenu',
                     'htmlOptions' => array('class' => 'pull-right'),
                     'items' => array(
-                        array('label' => 'Вход', 'url' => 'index.php?r=auth'),
-                        array('label' => 'Регистрация', 'url' => '#'),
+                        array('label' => 'Выход', 'url' => Yii::app()->request->baseUrl . '/auth/auth/logout'),
                         array('label' => 'Dropdown', 'url' => '#', 'items' => array(
-                                array('label' => 'Action', 'url' => '#'),
-                                array('label' => 'Another action', 'url' => '#'),
-                                array('label' => 'Something else here', 'url' => '#'),
-                                '---',
-                                array('label' => 'Separated link', 'url' => '#'),
-                            )),
+                            array('label' => 'Action', 'url' => '#'),
+                            array('label' => 'Another action', 'url' => '#'),
+                            array('label' => 'Something else here', 'url' => '#'),
+                            '---',
+                            array('label' => 'Separated link', 'url' => '#'),
+                        )),
                     ),
                 ),
             ),
         ));
         ?>
-
         <div class="container-fluid">
             <div class="row-fluid">
                 <div class="row-fluid">
@@ -76,12 +82,12 @@
                     <div class="span2">
                         <?php $this->widget('bootstrap.widgets.TbMenu', array(
                             'type'=>'list',
-                            'items'=>array(
+                            'items'=>$this->arMenu/*array(
                                 array('label'=>'Разделы'),
                                 array('label'=>'Новости', 'icon'=>'book', 'url'=> Yii::app()->createUrl("/admin/admin/showNews"), 'active'=>true),
                                 array('label'=>'Продукция', 'icon'=>'icon-th', 'url'=>'#'),
                                 array('label'=>'Пользователи', 'icon'=>'icon-user', 'url'=>'#'),
-                            ),
+                            ),*/
                         )); ?>
                     </div>
                     <?php echo $content; ?>

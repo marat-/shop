@@ -86,6 +86,10 @@ $(function() {
         });
         return false;
     });
+
+    $("#close-news-dialog").live("click", function() {
+        removeCLEditorInstances();
+    });
 });
 
 function rescaleModalWindow(sel){

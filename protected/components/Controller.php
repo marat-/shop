@@ -9,7 +9,8 @@ class Controller extends CController
 	 * @var string the default layout for the controller view. Defaults to '//layouts/column1',
 	 * meaning using a single column layout. See 'protected/views/layouts/column1.php'.
 	 */
-	public $layout='//layouts/column1';
+	public $layout='//layouts/main_bootstrap';
+    public $arMenu;
 	/**
 	 * @var array context menu items. This property will be assigned to {@link CMenu::items}.
 	 */
@@ -43,24 +44,19 @@ class Controller extends CController
      * @param mixed $data Данные для вывода в браузер
      * @param string $content_type Тип данных
      */
-    public function show_data(& $data, $content_type = "html", $callback = "") {
-        // Хак для js-плагина jQuery.form. Нужен для передачи браузеру данных в формате json или script, если выгружается файл
-        if(isset($_REQUEST['sessid'])&&$_REQUEST['sessid']||isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest'){
-            $xhr = true;
-        }else{
-            $xhr = false;
-        }
-        if (!$xhr && ($content_type == "json" || $content_type == "script")) {
-            $data = '<textarea>' . $data . '</textarea>';
+    public function showPage($oController,$sView, $arParams, $bPartial=false) {
+        if($bPartial) {
+            $this->renderPartial($sView, $arParams);
         } else {
-            $this->output->set_content_type($content_type);
+            // Обрабатываем и формируем меню
+            $criteria=new CDbCriteria;
+            $criteria->addCondition("active = 1");
+            $arMenuItems=Menu::model()->findAll($criteria);
+            $this->arMenu = array(array('label'=>'Разделы'));
+            foreach($arMenuItems as $key=>$value) {
+                $this->arMenu[] = array('label'=>$value['name'], 'icon'=>$value['icon'], 'url'=> Yii::app()->createUrl($value['path']), 'active'=>$oController->getId() == $value['controller'], 'visible' => Yii::app()->user->checkAccess('adminPanel'));
+            }
+            $this->render($sView, $arParams);
         }
-
-        // Добавляем проверочную информацию, если необходимо.
-        if ($callback) {
-            $data = $callback . "(" . $data . ")";
-        }
-
-        echo $data;
     }
 }

@@ -58,12 +58,11 @@ class Users extends CActiveRecord
 			array('id, email, name, second_name, surname, password, telephone, address, city, gender_id, active, description', 'safe', 'on'=>'search'),
 
             array('email, password', 'required', 'on'=>'login, withCaptcha'),
-            array('email', 'email', 'on'=>'login, withCaptcha'),
+            array('email', 'email', 'on'=>'login, withCaptcha, restore'),
             array('rememberMe', 'boolean', 'on'=>'login, withCaptcha'),
             array('password', 'authenticate', 'on'=>'login, withCaptcha', 'skipOnError'=>'true'),
             array('verifyCode', 'captcha', 'allowEmpty' => !CCaptcha::checkRequirements(), 'on' => 'withCaptcha, restore', 'skipOnError'=>'true'),
 
-            array('email', 'required', 'on'=>'restore'),
             array('email', 'required', 'on'=>'restore'),
             array('email', 'checkAvailable', 'on'=>'restore'),
 		);

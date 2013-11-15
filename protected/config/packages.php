@@ -1,9 +1,9 @@
 <?php
 return array(
-    'jquery' => array(
+    /*'jquery' => array(
         'baseUrl' =>  '//code.jquery.com/',
-        'js' => array('jquery-1.10.2.min.js', 'jquery-migrate-1.2.1.min.js'),
-    ),
+        'js' => array('jquery-1.8.2.min.js', 'jquery-migrate-1.2.1.min.js'),
+    ),*/
     'common_plugins' => array(
         'basePath' =>  'webroot.js.common',
         'js' => array('jquery.cookie.js'),
@@ -14,7 +14,7 @@ return array(
         'js' => array('script_func.js', 'script_init.js', 'script.js'),
         'depends' => array('common_plugins'),
     ),
-    'extension_js' => array(
+    'cleditor_js' => array(
         'basePath' =>  'ext.cleditor.assets',
         'js' => array('jquery.cleditor.min.js'),
         'depends' => array('common_plugins'),
@@ -24,7 +24,7 @@ return array(
         'css' => array('style.css'),
     ),
     'common_resource' => array(
-        'depends' => array('common_plugins', 'common_js', 'common_css', 'extension_js'),
+        'depends' => array('common_js', 'common_css'),
     ),
     'news_js' => array(
         'basePath' => 'news.js',
@@ -35,7 +35,7 @@ return array(
         'css' => array('news.css'),
     ),
     'news_resource' => array(
-        'depends' => array('common_resource', 'news_js', 'news_css'),
+        'depends' => array('common_resource', 'cleditor_js', 'news_js', 'news_css'),
     ),
     'auth_js' => array(
         'basePath' => 'auth.js',

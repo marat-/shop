@@ -21,6 +21,7 @@ return array(
 		'application.models.*',
 		'application.components.*',
         'ext.mail.YiiMailMessage',
+        'application.modules.srbac.controllers.SBaseController',
 	),
 
 	'modules'=>array(
@@ -42,7 +43,30 @@ return array(
         ),
         'news' => array(
             'defaultController' => 'News',
-        )
+        ),
+        'srbac' => array(
+            'userclass'=>'Users', //default: User
+            'userid'=>'id', //default: userid
+            'username'=>'email', //default:username
+            'delimeter'=>'@', //default:-
+            'debug'=>true, //default :false
+            'pageSize'=>10, // default : 15
+            'superUser' =>'Authority', //default: Authorizer
+            'css'=>'srbac.css', //default: srbac.css
+            'layout'=>
+            'application.views.layouts.main_admin', //default: application.views.layouts.main,
+            'notAuthorizedView'=> 'srbac.views.authitem.unauthorized', // default:
+            //srbac.views.authitem.unauthorized, must be an existing alias
+            'alwaysAllowed'=>array( //default: array()
+                'SiteLogin','SiteLogout','SiteIndex','SiteAdmin',
+                'SiteError', 'SiteContact'),
+            'userActions'=>array('Show','View','List'), //default: array()
+            'listBoxNumberOfLines' => 15, //default : 10 'imagesPath' => 'srbac.images', // default: srbac.images 'imagesPack'=>'noia', //default: noia 'iconText'=>true, // default : false 'header'=>'srbac.views.authitem.header', //default : srbac.views.authitem.header,
+            //must be an existing alias 'footer'=>'srbac.views.authitem.footer', //default: srbac.views.authitem.footer,
+            //must be an existing alias 'showHeader'=>true, // default: false 'showFooter'=>true, // default: false
+            'alwaysAllowedPath'=>'srbac.components', // default: srbac.components
+            // must be an existing alias )
+        ),
 	),
 
 	// application components
@@ -50,6 +74,7 @@ return array(
 		'user'=>array(
 			// enable cookie-based authentication
 			'allowAutoLogin'=>true,
+            'loginUrl'=>array('auth'),
 		),
         'mail' => array(
             'class' => 'ext.mail.YiiMail',
@@ -66,9 +91,6 @@ return array(
 				'<controller:\w+>/<action:\w+>/<id:\d+>'=>'<controller>/<action>',
 				'<controller:\w+>/<action:\w+>'=>'<controller>/<action>',
 			),
-		),
-		'db'=>array(
-			'connectionString' => 'sqlite:'.dirname(__FILE__).'/../data/testdrive.db',
 		),
 		// uncomment the following to use a MySQL database
 		'db'=>array(
@@ -93,14 +115,14 @@ return array(
                     'showInFireBug' => true,
                     'categories'=>'system.db.CDbCommand.query, application'
 				),
-                array(
+                /*array(
                     'class'=>'CFileLogRoute',
                     'levels'=>'error, warning',
                 ),
                 array(
                     'class'=>'CProfileLogRoute',
                     'enabled'=>true,
-                ),
+                ),*/
 			),
 		),
         'bootstrap'=>array(
@@ -110,9 +132,9 @@ return array(
             'packages' => $packages,
             'class' => 'CClientScript',
             'scriptMap' => array(
-                'jquery.js'=>false,
+                'jquery.js'=>'//code.jquery.com/jquery-1.8.2.min.js',
             ),
-            'coreScriptPosition' => CClientScript::POS_BEGIN,
+            'coreScriptPosition' => CClientScript::POS_HEAD,
         ),
         'image'=>array(
             'class'=>'application.extensions.image.CImageComponent',
@@ -122,7 +144,14 @@ return array(
             'params'=>array('directory'=>'/usr/bin'),
         ),
         'request'=>array(
-            'enableCsrfValidation'=>true,
+            'enableCsrfValidation'=>false,
+        ),
+        'authManager'=>array(
+            'class'=>'CDbAuthManager',
+            'connectionID'=>'db',
+            'itemTable'=>'AuthItem',
+            'assignmentTable'=>'AuthAssignment',
+            'itemChildTable'=>'AuthItemChild',
         ),
     ),
     'theme'=>'bootstrap',

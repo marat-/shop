@@ -26,6 +26,44 @@ class AuthController extends Controller {
         );
     }
 
+    function actionT() {
+        $auth=Yii::app()->authManager;
+
+        /*$auth->createOperation('readPost','просмотр записи');
+        $auth->createOperation('updatePost','редактирование записи');
+        $auth->createOperation('deletePost','удаление записи');
+
+        $bizRule='return Yii::app()->user->id==$params["post"]->authID;';
+        $task=$auth->createTask('updateOwnPost','редактирование своей записи',$bizRule);
+        $task->addChild('updatePost');
+
+        $role=$auth->createRole('reader');
+        $role->addChild('readPost');
+
+        $role=$auth->createRole('author');
+        $role->addChild('reader');
+        $role->addChild('createPost');
+        $role->addChild('updateOwnPost');
+
+        $role=$auth->createRole('editor');
+        $role->addChild('reader');
+        $role->addChild('updatePost');
+
+        $role=$auth->createRole('admin');
+        $role->addChild('editor');
+        $role->addChild('author');
+        $role->addChild('deletePost');
+
+        $auth->assign('reader','readerA');
+        $auth->assign('author','authorB');
+        $auth->assign('editor','editorC');
+        $auth->assign('admin','adminD');*/
+        $auth->createOperation('adminPanel','доступ к панели администрирования');
+        //$role->addChild('readPost');
+
+    }
+
+
     /**
      * Проверка введенных пользователем логина/пароля или проверочного кода
      * Функция принимает исходные данные в POST (из формы на сайте) и в зависимости от типа пришедших данных
@@ -89,7 +127,7 @@ class AuthController extends Controller {
             unset(Yii::app()->session['authScenario']);
             unset(Yii::app()->session['authResult']);
             unset(Yii::app()->session['authModel']);
-            $this->redirect(Yii::app()->getBaseUrl(true) . '/admin');
+            $this->redirect(Yii::app()->user->returnUrl ? Yii::app()->user->returnUrl : Yii::app()->getBaseUrl(true) . '/admin');
         } else {
             Yii::app()->session['authResult'] = $sResult;
             Yii::app()->session['authModel'] = $oAuthModel;
@@ -233,5 +271,10 @@ class AuthController extends Controller {
             $sPassword .= !($i%2) ? $arChars[rand(0,$iSize)] : $arDigits[rand(0,$iDigitSize)];
         }
         return $sPassword;
+    }
+
+    public function actionLogout() {
+        Yii::app()->user->logout();
+        $this->redirect(Yii::app()->getBaseUrl(true) . '/auth');
     }
 }

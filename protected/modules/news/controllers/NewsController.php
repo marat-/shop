@@ -18,16 +18,16 @@ class NewsController extends Controller {
     public function accessRules() {
         return array(
             array('allow',
-                'actions'=>array('create', 'edit', 'delete'),
-                //'roles'=>array('admin'),
+                'actions'=>array('create', 'getNewsForm','edit', 'delete'),
+                'roles'=>array('admin'),
                 'users'=>array('*'),
             ),
             array('allow',
                 'actions'=>array('show'),
-                'users'=>array('*'),
+                'users'=>array('reader'),
             ),
             array('deny',
-                'actions'=>array('create', 'edit', 'delete'),
+                'actions'=>array('create', 'getNewsForm', 'edit', 'delete'),
             ),
         );
     }
@@ -59,8 +59,9 @@ class NewsController extends Controller {
                 'gridDataProvider' => $arNews,
             ), false, true);
         } else {
-            $this->render('news', array(
+            $this->showPage($this, 'news', array(
                 'gridDataProvider' => $arNews,
+                'type'=>'news'
             ));
         }
     }
@@ -77,7 +78,6 @@ class NewsController extends Controller {
             $oNewsGalleryModel = new NewsGallery('create');
         }
         Yii::app()->clientScript->corePackages = array();
-
         $oHbLanguages = new HbLanguages();
         $arLanguages = $oHbLanguages->findAll();
         foreach($arLanguages as $arLanguage) {
@@ -228,27 +228,33 @@ class NewsController extends Controller {
     }
 
     public function renderButtons($data, $row) {
-        $arButtonItems = array('label'=>'Действия', 'items'=>array(
+        $arButtonItems = array('label'=>'Действия');
+        if(Yii::app()->user->checkAccess('createPost')) {
+            $arButtonItems['items'][] =
                 array('label'=>'Просмотр', 'url'=>'#', 'linkOptions'=>array(
-                        'class' => 'b-news-view',
-                    ),
+                    'class' => 'b-news-view',
+                )
+            );
+        }
+        $params=array('post'=>$data);
+        if(Yii::app()->user->checkAccess('updateOwnPost',$params)) {
+                $arButtonItems['items'][] = array('label'=>'Редактирование', 'url'=>'#', 'linkOptions'=>array(
+                    'class' => 'b-news-update',
                 ),
-                array('label'=>'Редактирование', 'url'=>'#', 'linkOptions'=>array(
-                        'class' => 'b-news-update',
-                    ),
-                ),
-            )
-        );
-        if($data->del == 0) {
-            $arButtonItems['items'][] =  array('label'=>'Удаление', 'url'=>'#', 'linkOptions'=>array(
+            );
+        }
+        if(Yii::app()->user->checkAccess('deletePost')) {
+            if($data->del == 0) {
+                $arButtonItems['items'][] =  array('label'=>'Удаление', 'url'=>'#', 'linkOptions'=>array(
                     'class' => 'b-news-delete',
                 ),
-            );
-        } else {
-            $arButtonItems['items'][] =  array('label'=>'Восстановление', 'url'=>'#', 'linkOptions'=>array(
+                );
+            } else {
+                $arButtonItems['items'][] =  array('label'=>'Восстановление', 'url'=>'#', 'linkOptions'=>array(
                     'class' => 'b-news-restore',
                 ),
-            );
+                );
+            }
         }
         $this->widget('bootstrap.widgets.TbButtonGroup', array(
             'size'=>'small',

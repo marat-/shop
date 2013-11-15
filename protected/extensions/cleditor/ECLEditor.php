@@ -58,9 +58,12 @@ class ECLEditor extends CInputWidget
 		else
 			echo CHtml::textArea($name,$this->value,$this->htmlOptions);
 		
-		$options=CJavaScript::encode($this->options);	
+		$options=CJavaScript::encode($this->options);
 		Yii::app()->clientScript->registerScript($id,"
-			$('#{$id}').cleditor({$options});
+		    if(typeof cleditor_instances == 'undefined') {
+                cleditor_instances = [];
+		    }
+			cleditor_instances.push($('#{$id}').cleditor({$options}));
 		");
 	}
 	

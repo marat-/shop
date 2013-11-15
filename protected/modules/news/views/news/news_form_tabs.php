@@ -112,7 +112,14 @@
         <?php echo CHtml::ajaxSubmitButton('Сохранить',
             array('/news/news/edit'),
             array(
-                'success'=>'function(html){if (html == ""){ $("#news-grid").yiiGridView("update", {}); $("#news-create-dialog").modal("hide");}}',
+                'success'=>'function(html){
+                    if (html == ""){
+                        $("#news-grid").yiiGridView("update", {});
+                        $("#news-create-dialog").modal("hide");
+
+                        removeCLEditorInstances();
+                    }
+                }',
                 'beforeSend' => 'function(){
                         $.fn.yiiactiveform.validate("#news-form", function(a){console.log(a);}, function(a){console.log(a)});
                      }',
@@ -124,7 +131,8 @@
             'label'=>'Закрыть',
             'url'=>'#',
             'htmlOptions'=>array('data-dismiss'=>'modal', "id" => "close-news-dialog"),
-        )); ?>
+            )
+        ); ?>
     </div>
 
 <?php $this->endWidget(); ?>
